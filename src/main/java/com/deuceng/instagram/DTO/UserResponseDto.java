@@ -8,6 +8,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 public class UserResponseDto {
+    private String token;
     private String username;
     private String bio;
     private boolean isPrivate;

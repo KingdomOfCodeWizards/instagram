@@ -5,13 +5,12 @@ import com.deuceng.instagram.DTO.UserResponseDto;
 import com.deuceng.instagram.Entity.User;
 import com.deuceng.instagram.Exception.UserAlreadyExistsException;
 import com.deuceng.instagram.Repository.UserRepository;
-import jakarta.persistence.EntityExistsException;
+import com.deuceng.instagram.Security.JwtService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
-import java.time.LocalDate;
 
 @Slf4j
 @Service
@@ -19,16 +18,19 @@ import java.time.LocalDate;
 public class AuthService {
 
     private final UserRepository userRepository;
-
+    private final JwtService jwtService;
     private final PasswordEncoder passwordEncoder;
 
     public UserResponseDto login(LoginDto loginDto) {
         User user = userRepository.findByUsernameOrEmail(loginDto.getIdentifier(),loginDto.getIdentifier())
-                .orElse(null);
-        if(user==null || !passwordEncoder.matches(loginDto.getPassword(),user.getPassword())){
+                .orElseThrow(() -> new BadCredentialsException("Geçersiz kullanıcı adı veya şifre"));
+        if(!passwordEncoder.matches(loginDto.getPassword(),user.getPassword())){
             throw new BadCredentialsException("Geçersiz kullanıcı adı veya şifre");
         }
-        return new UserResponseDto(user.getUsername(),
+
+        String jwtToken = jwtService.generateToken(user.getUsername());
+
+        return new UserResponseDto(jwtToken,user.getUsername(),
                 user.getBio(),
                 user.isPrivate(),
                 user.getProfile_url());
@@ -47,7 +49,10 @@ public class AuthService {
         newUser.setEmail(registerDto.getEmail());
 
         userRepository.save(newUser);
-        return new UserResponseDto(newUser.getUsername(),
+        String jwtToken = jwtService.generateToken(registerDto.getUsername());
+
+        return new UserResponseDto(jwtToken,
+                newUser.getUsername(),
                 newUser.getBio(),
                 newUser.isPrivate(),
                 newUser.getProfile_url());

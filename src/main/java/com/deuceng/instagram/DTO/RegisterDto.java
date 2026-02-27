@@ -11,9 +11,10 @@ public class RegisterDto {
     private String name;
     private String surname;
     @NotBlank(message = " Kullanıcı adı giriniz!")
-    @Size(min = 6, message = "Şifre en az 4 karakter olmalı")
+    @Size(min = 6, message = "Kullanıcı adı en az 4 karakter olmalı!")
     private String username;
     @NotBlank(message = "Lütfen şifre oluşturunuz!")
+    @Size(message = "Şifre en az 4 karakterli olmalıdır!")
     private String password;
     @Email
     private String email;

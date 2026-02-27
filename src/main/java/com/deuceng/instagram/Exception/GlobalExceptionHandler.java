@@ -2,6 +2,7 @@ package com.deuceng.instagram.Exception;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.context.request.WebRequest;
@@ -50,5 +51,23 @@ public class GlobalExceptionHandler {
         );
 
         return new ResponseEntity<>(message, HttpStatus.INTERNAL_SERVER_ERROR);
+    }
+    @ExceptionHandler(MethodArgumentNotValidException.class)
+    public ResponseEntity<ErrorMessage> handleValidationExceptions(MethodArgumentNotValidException ex, WebRequest request) {
+        // Tüm hataları toplayıp tek bir String haline getiriyoruz
+        StringBuilder details = new StringBuilder();
+        ex.getBindingResult().getAllErrors().forEach((error) -> {
+            String message = error.getDefaultMessage();
+            details.append(message).append(" ");
+        });
+
+        ErrorMessage errorMessage = new ErrorMessage(
+                HttpStatus.BAD_REQUEST.value(),
+                LocalDateTime.now(),
+                "Validasyon Hatası: " + details.toString().trim(),
+                request.getDescription(false)
+        );
+
+        return new ResponseEntity<>(errorMessage, HttpStatus.BAD_REQUEST);
     }
 }
