@@ -31,4 +31,18 @@ public class SecurityConfig {
 
         return http.build();
     }
+
+    @Bean
+    public org.springframework.web.filter.CorsFilter corsFilter() {
+        org.springframework.web.cors.UrlBasedCorsConfigurationSource source = new org.springframework.web.cors.UrlBasedCorsConfigurationSource();
+        org.springframework.web.cors.CorsConfiguration config = new org.springframework.web.cors.CorsConfiguration();
+
+        config.setAllowCredentials(true);
+        config.addAllowedOrigin("http://localhost:8081"); // Frontend portumuz
+        config.addAllowedHeader("*");
+        config.addAllowedMethod("*"); // GET, POST, OPTIONS vs hepsine izin ver
+
+        source.registerCorsConfiguration("/**", config);
+        return new org.springframework.web.filter.CorsFilter(source);
+    }
 }
