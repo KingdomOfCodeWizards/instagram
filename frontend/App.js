@@ -87,25 +87,24 @@ export default function App() {
     }
   };
 
+
   // ================= BACKEND GÖNDERİLERİ (POSTS) ÇEKME =================
   const fetchPosts = async () => {
     setRefreshing(true);
     try {
-      // Senin PostController içindeki listeleme ucuyla konuşur
+      // Senin PostController içindeki listeleme ucu (@RequestMapping("/api/posts"))
+      // Eğer backend'inde tüm postları listeleyen GET ucu "/api/posts" ise aynen kalabilir
       const response = await axios.get(`${API_BASE_URL}/api/posts`, {
         headers: { Authorization: `Bearer ${token}` }
       });
-      
-      // Eğer backend veri döndüyse state'e yaz
-      if(response.data && response.data.length > 0) {
+
+      // Backend'den gelen gerçek veriyi doğrudan eyalete (state) aktarıyoruz
+      if (response.data) {
         setPosts(response.data);
-      } else {
-        // Boşsa dummy verileri göster ki ekran boş kalmasın
-        loadDummyPosts();
       }
     } catch (error) {
-      console.error("Postlar çekilemedi, test verileri yükleniyor:", error);
-      loadDummyPosts();
+      console.error("Postlar çekilemedi:", error);
+      alert("Akış güncellenirken bir hata oluştu.");
     } finally {
       setRefreshing(false);
     }
@@ -251,29 +250,42 @@ export default function App() {
                 ))}
               </ScrollView>
             )}
+              /* FlatList içindeki renderItem kısmını senin DTO yapına göre şu şekilde güncelledik: */
             renderItem={({ item }) => (
-              /* Her Bir Instagram Post Kartı */
-              <View style={styles.postContainer}>
-                <View style={styles.postHeader}>
-                  <View style={styles.avatarCircle} />
-                  <Text style={styles.postUsername}>{item.user?.username || 'kullanıcı'}</Text>
-                </View>
+                /* Her Bir Canlı Instagram Post Kartı */
+                <View style={styles.postContainer}>
+                  {/* Post Üst Bilgisi (Profil Fotoğrafı + İsim) */}
+                  <View style={styles.postHeader}>
+                    {/* Eğer profil fotoğrafı linki varsa onu basar, yoksa gri yuvarlak gösterir */}
+                    {item.user?.profileUrl ? (
+                        <Image source={{ uri: item.user.profileUrl }} style={styles.avatarImage} />
+                    ) : (
+                        <View style={styles.avatarCircle} />
+                    )}
+                    <Text style={styles.postUsername}>{item.user?.username || 'bilinmeyen_kullanıcı'}</Text>
+                  </View>
 
-                <Image source={{ uri: item.mediaUrl || 'https://picsum.photos/400/400' }} style={styles.postImage} />
+                  {/* Post Görseli - Senin DTO'daki 'imageUrl' alanından besleniyor */}
+                  <Image
+                      source={{ uri: item.imageUrl || 'https://picsum.photos/400/400' }}
+                      style={styles.postImage}
+                  />
 
-                <View style={styles.postActions}>
-                  <TouchableOpacity style={styles.actionButton}><Text style={{fontSize: 18}}>🤍</Text></TouchableOpacity>
-                  <TouchableOpacity style={styles.actionButton}><Text style={{fontSize: 18}}>💬</Text></TouchableOpacity>
-                  <TouchableOpacity style={styles.actionButton}><Text style={{fontSize: 18}}>✈️</Text></TouchableOpacity>
-                </View>
+                  {/* Post Etkileşim Butonları */}
+                  <View style={styles.postActions}>
+                    <TouchableOpacity style={styles.actionButton}><Text style={{fontSize: 18}}>🤍</Text></TouchableOpacity>
+                    <TouchableOpacity style={styles.actionButton}><Text style={{fontSize: 18}}>💬</Text></TouchableOpacity>
+                    <TouchableOpacity style={styles.actionButton}><Text style={{fontSize: 18}}>✈️</Text></TouchableOpacity>
+                  </View>
 
-                <View style={styles.postDetails}>
-                  <Text style={styles.descriptionText}>
-                    <Text style={styles.boldUsername}>{item.user?.username || 'kullanıcı'} </Text>
-                    {item.description}
-                  </Text>
+                  {/* Post Detayları - Senin DTO'daki 'caption' alanından besleniyor */}
+                  <View style={styles.postDetails}>
+                    <Text style={styles.descriptionText}>
+                      <Text style={styles.boldUsername}>{item.user?.username || 'kullanıcı'} </Text>
+                      {item.caption}
+                    </Text>
+                  </View>
                 </View>
-              </View>
             )}
           />
 

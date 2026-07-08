@@ -14,6 +14,9 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.util.List;
+import java.util.stream.Collectors;
+
 @Service
 @RequiredArgsConstructor
 public class PostServiceImpl implements IPostService {
@@ -64,5 +67,16 @@ public class PostServiceImpl implements IPostService {
                         .profileUrl(post.getUser().getProfile_url()) // sende getProfileUrl() ise düzelt
                         .build())
                 .build();
+    }
+
+    @Override
+    public List<PostResponseDto> getAllPosts() {
+        // 1) PostRepository kullanarak DB'deki tüm postları çekiyoruz
+        List<Post> posts = postRepository.findAll();
+
+        // 2) Çekilen entity listesini Stream ile haritalayıp DTO listesine çeviriyoruz
+        return posts.stream()
+                .map(this::toPostResponse)
+                .collect(Collectors.toList());
     }
 }

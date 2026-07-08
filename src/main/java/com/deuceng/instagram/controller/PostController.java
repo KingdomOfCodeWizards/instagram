@@ -7,6 +7,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.util.List;
+
 @RestController
 @RequestMapping("/api/posts")
 @CrossOrigin(origins = "*", allowedHeaders = "*")
@@ -22,4 +24,11 @@ public class PostController {
     ) {
         return ResponseEntity.ok(postService.createPost(file, caption));
     }
+
+    @GetMapping
+    public ResponseEntity<List<PostResponseDto>> getAllPosts() {
+        return ResponseEntity.ok(postService.getAllPosts());
+    }
+
+
 }
